@@ -174,6 +174,7 @@ int main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MDL file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering for textures");
 	CommandLineParser::Option<std::string> texture(cmd, "texture", "Texture to use (required)", "");
+	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette", "");
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -194,6 +195,22 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
+	const uint8_t* paletteData = quakePalette;
+	std::vector<uint8_t> externalPaletteData;
+	if(palette)
+	{
+		FileReadStorage paletteFile(*palette);
+		size_t paletteSize = paletteFile.GetSize();
+		if(paletteSize != 768)
+		{
+			std::cerr << "Not a valid palette file\n";
+			return EXIT_FAILURE;
+		}
+		externalPaletteData.resize(768);
+		paletteFile.Read(externalPaletteData.data(), 768);
+		paletteData = externalPaletteData.data();
+	}
+
 	int x, y, n;
 	uint8_t* textureData = stbi_load(texture->c_str(), &x, &y, &n, 3);
 	if(!textureData)
@@ -202,7 +219,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	auto skin = ConvertToIndexed(textureData, x, y, quakePalette, dither);
+	auto skin = ConvertToIndexed(textureData, x, y, paletteData, dither);
 
 	if(StringUtils::EndsWith(*inFileName, ".obj"))
 	{

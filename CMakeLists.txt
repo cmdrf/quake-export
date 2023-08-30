@@ -25,3 +25,5 @@ add_executable(mdl-export
 target_link_libraries(mdl-export PRIVATE
 	molecular::util
 )
+
+install(TARGETS mdl-export DESTINATION bin)

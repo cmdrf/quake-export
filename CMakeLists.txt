@@ -18,7 +18,8 @@ add_executable(mdl-export
 	src/QuakeNormal.h
 	src/QuakePalette.cpp
 	src/QuakePalette.h
-	src/stb_image.cpp
+	src/StbImage.cpp
+	src/StbImage.h
 	src/stb_image.h
 )
 

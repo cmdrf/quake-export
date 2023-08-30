@@ -27,6 +27,7 @@ SOFTWARE.
 #include "PaletteImage.h"
 #include "QuakePalette.h"
 #include "QuakeNormal.h"
+#include "StbImage.h"
 
 #include <molecular/util/FileStreamStorage.h>
 #include <molecular/util/ObjFile.h>
@@ -34,7 +35,6 @@ SOFTWARE.
 #include <molecular/util/StringUtils.h>
 #include <molecular/util/CommandLineParser.h>
 
-#include "stb_image.h"
 
 #include <iostream>
 
@@ -211,15 +211,9 @@ int main(int argc, char** argv)
 		paletteData = externalPaletteData.data();
 	}
 
-	int x, y, n;
-	uint8_t* textureData = stbi_load(texture->c_str(), &x, &y, &n, 3);
-	if(!textureData)
-	{
-		std::cerr << "Can't open texture " << *texture << std::endl;
-		return EXIT_FAILURE;
-	}
+	StbImage textureImage(texture->c_str(), 3);
 
-	auto skin = ConvertToIndexed(textureData, x, y, paletteData, dither);
+	auto skin = ConvertToIndexed(textureImage.Data(), textureImage.GetWidth(), textureImage.GetHeight(), paletteData, dither);
 
 	if(StringUtils::EndsWith(*inFileName, ".obj"))
 	{
@@ -247,8 +241,6 @@ int main(int argc, char** argv)
 		for(auto& pos: positions)
 			pos *= 64.0 / 1.7;
 
-		WriteMdl(indices, positions, normals, uvs, skin, x, y, *outFileName);
+		WriteMdl(indices, positions, normals, uvs, skin, textureImage.GetWidth(), textureImage.GetHeight(), *outFileName);
 	}
-
-	stbi_image_free(textureData);
 }

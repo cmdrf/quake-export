@@ -30,6 +30,7 @@ SOFTWARE.
 #include <molecular/util/StreamStorage.h>
 
 #include <cstdint>
+#include <vector>
 
 class MdlFile
 {

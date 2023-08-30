@@ -25,6 +25,8 @@ SOFTWARE.
 
 #include <molecular/util/Vector3.h>
 
+#include <vector>
+
 using namespace molecular::util;
 
 static const std::vector<Vector3> normals = {

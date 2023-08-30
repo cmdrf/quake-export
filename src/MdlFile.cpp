@@ -26,6 +26,7 @@ SOFTWARE.
 #include "MdlFile.h"
 
 #include <cassert>
+#include <cstring>
 
 MdlFile::MdlFile(molecular::util::WriteStorage& storage) :
 	mStorage(storage)

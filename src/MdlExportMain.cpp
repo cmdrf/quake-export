@@ -167,7 +167,7 @@ void WriteMdl(
 	mdl.WriteSingleFrame(frame);
 }
 
-int main(int argc, char** argv)
+int Main(int argc, char** argv)
 {
 	CommandLineParser cmd;
 	CommandLineParser::PositionalArg<std::string> inFileName(cmd, "input file", "Input mesh");
@@ -242,5 +242,19 @@ int main(int argc, char** argv)
 			pos *= 64.0 / 1.7;
 
 		WriteMdl(indices, positions, normals, uvs, skin, textureImage.GetWidth(), textureImage.GetHeight(), *outFileName);
+	}
+	return EXIT_SUCCESS;
+}
+
+int main(int argc, char** argv)
+{
+	try
+	{
+		return Main(argc, argv);
+	}
+	catch(std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 }

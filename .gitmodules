@@ -1,0 +1,3 @@
+[submodule "molecular-util"]
+	path = molecular-util
+	url = https://github.com/cmdrf/molecular-util.git

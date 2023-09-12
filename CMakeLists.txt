@@ -9,4 +9,5 @@ find_package(Threads REQUIRED)
 add_subdirectory(molecular-util)
 add_subdirectory(lib)
 add_subdirectory(mdl-export)
+add_subdirectory(miptex-export)
 

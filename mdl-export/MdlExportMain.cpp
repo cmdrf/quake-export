@@ -24,10 +24,10 @@ SOFTWARE.
 */
 
 #include "MdlFile.h"
-#include "PaletteImage.h"
-#include "QuakePalette.h"
+#include <PaletteImage.h>
+#include <QuakePalette.h>
 #include "QuakeNormal.h"
-#include "StbImage.h"
+#include <StbImage.h>
 
 #include <molecular/util/FileStreamStorage.h>
 #include <molecular/util/ObjFile.h>

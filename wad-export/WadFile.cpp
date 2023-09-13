@@ -1,5 +1,7 @@
 #include "WadFile.h"
 
+#include <cstring>
+
 struct Header
 {
 	uint8_t magic[4];

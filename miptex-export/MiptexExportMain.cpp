@@ -14,25 +14,6 @@
 using namespace molecular;
 using namespace molecular::util;
 
-std::string FileName(const std::string& path)
-{
-	auto lastSlash = path.find_last_of("/\\");
-	if(lastSlash == std::string::npos)
-		return path;
-	else
-		return path.substr(lastSlash + 1);
-}
-
-std::string FileNameWithoutExtension(const std::string& path)
-{
-	auto filename = FileName(path);
-	auto firstDot = filename.find_first_of('.');
-	if(firstDot == std::string::npos)
-		return filename;
-	else
-		return filename.substr(0, firstDot);
-}
-
 std::pair<std::vector<uint8_t>, std::vector<uint8_t>> SplitColorAndAlpha(const uint8_t* data, int width, int height)
 {
 	std::pair<std::vector<uint8_t>, std::vector<uint8_t>> out;
@@ -94,7 +75,7 @@ int Main(int argc, char** argv)
 
 	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, quakePalette, dither);
 	SetTransparency(indexedImage, alpha);
-	outMiptexFile.WriteHeader(FileNameWithoutExtension(*inFileName).c_str(), width, height);
+	outMiptexFile.WriteHeader(StringUtils::FileNameWithoutExtension(*inFileName).c_str(), width, height);
 	outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 
 	int newWidth = width / 2;

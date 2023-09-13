@@ -28,7 +28,7 @@ void MiptexFile::WriteHeader(const char name[], unsigned int width, unsigned int
 	header.offset1 = sizeof(Header);
 	header.offset2 = header.offset1 + width * height;
 	header.offset4 = header.offset2 + (width * height) / 4;
-	header.offset8 = header.offset4 + (width * height) / 8;
+	header.offset8 = header.offset4 + (width * height) / 16;
 	mStorage.Write(&header, sizeof(Header));
 }
 

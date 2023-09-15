@@ -2,6 +2,7 @@
 #define LOADPALETTE_H
 
 #include <vector>
+#include <cstdint>
 
 /// Load palette from file
 /** Can be a 16x16 image or a Quake .lmp file. */

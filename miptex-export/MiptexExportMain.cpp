@@ -1,5 +1,6 @@
 #include "MiptexFile.h"
 
+#include <LoadPalette.h>
 #include <StbImage.h>
 #include <PaletteImage.h>
 #include <QuakePalette.h>
@@ -46,6 +47,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> inFileName(cmd, "input file", "Input image");
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MIPTEX file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering");
+	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -57,6 +59,14 @@ int Main(int argc, char** argv)
 		std::cerr << e.what() << std::endl;
 		cmd.PrintHelp();
 		return EXIT_FAILURE;
+	}
+
+	const uint8_t* paletteData = quakePalette;
+	std::vector<uint8_t> loadedPalette;
+	if(palette)
+	{
+		loadedPalette = LoadPaletteFile(palette->c_str());
+		paletteData = loadedPalette.data();
 	}
 
 	FileWriteStorage outFile(outFileName->c_str());
@@ -73,7 +83,7 @@ int Main(int argc, char** argv)
 
 	auto [color, alpha] = SplitColorAndAlpha(textureImage.Data(), width, height);
 
-	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, quakePalette, dither);
+	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, paletteData, dither);
 	SetTransparency(indexedImage, alpha);
 	outMiptexFile.WriteHeader(StringUtils::FileNameWithoutExtension(*inFileName).c_str(), width, height);
 	outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
@@ -86,7 +96,7 @@ int Main(int argc, char** argv)
 		stbir_resize_uint8_srgb_edgemode(textureImage.Data(), width, height, width * 4, newImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
 		auto [color, alpha] = SplitColorAndAlpha(newImage.data(), newWidth, newHeight);
 
-		indexedImage = ConvertToIndexed(color.data(), newWidth, newHeight, quakePalette, dither);
+		indexedImage = ConvertToIndexed(color.data(), newWidth, newHeight, paletteData, dither);
 		SetTransparency(indexedImage, alpha);
 		outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 

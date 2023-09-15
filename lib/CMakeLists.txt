@@ -1,4 +1,6 @@
 add_library(quake-export
+	LoadPalette.cpp
+	LoadPalette.h
 	PaletteImage.cpp
 	PaletteImage.h
 	QuakePalette.cpp

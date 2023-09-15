@@ -136,8 +136,8 @@ std::vector<uint8_t> ConvertToIndexed(const uint8_t* image, int width, int heigh
 	std::vector<RGB> rgbImage(width * height);
 	for(int i = 0; i < width * height; ++i)
 		rgbImage[i] = RGB{image[3*i], image[3*i + 1], image[3*i + 2]};
-	std::vector<RGB> rgbPalette(240);
-	for(int i = 0; i < 240; ++i)
+	std::vector<RGB> rgbPalette(224); // Don't use fire and full-bright colors
+	for(int i = 0; i < 224; ++i)
 		rgbPalette[i] = RGB{palette[3*i], palette[3*i + 1], palette[3*i + 2]};
 	return ConvertToIndexed(rgbImage, width, height, rgbPalette, dither);
 }

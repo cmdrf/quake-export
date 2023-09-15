@@ -1,13 +1,19 @@
 #ifndef STBIMAGE_H
 #define STBIMAGE_H
 
+#include <cstddef>
 #include <cstdint>
 
 /// Minimal C++ wrapper around stb_image
 class StbImage
 {
 public:
+	/// Load from file given by name
 	StbImage(char const *filename, int desired_channels);
+
+	/// Load from memory
+	StbImage(uint8_t const* data, size_t size, int desiredChannels);
+
 	StbImage(StbImage&) = delete;
 	~StbImage();
 

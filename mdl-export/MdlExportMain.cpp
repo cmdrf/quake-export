@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <LoadPalette.h>
 #include "MdlFile.h"
 #include <PaletteImage.h>
 #include <QuakePalette.h>
@@ -174,7 +175,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MDL file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering for textures");
 	CommandLineParser::Option<std::string> texture(cmd, "texture", "Texture to use (required)", "");
-	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette", "");
+	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -196,19 +197,11 @@ int Main(int argc, char** argv)
 	}
 
 	const uint8_t* paletteData = quakePalette;
-	std::vector<uint8_t> externalPaletteData;
+	std::vector<uint8_t> loadedPalette;
 	if(palette)
 	{
-		FileReadStorage paletteFile(*palette);
-		size_t paletteSize = paletteFile.GetSize();
-		if(paletteSize != 768)
-		{
-			std::cerr << "Not a valid palette file\n";
-			return EXIT_FAILURE;
-		}
-		externalPaletteData.resize(768);
-		paletteFile.Read(externalPaletteData.data(), 768);
-		paletteData = externalPaletteData.data();
+		loadedPalette = LoadPaletteFile(palette->c_str());
+		paletteData = loadedPalette.data();
 	}
 
 	StbImage textureImage(texture->c_str(), 3);

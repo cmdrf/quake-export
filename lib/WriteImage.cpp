@@ -5,6 +5,8 @@
 
 #include <molecular/util/StringUtils.h>
 
+#include <stdexcept>
+
 using namespace molecular::util::StringUtils;
 
 void WriteRgbImage(const char* path, const uint8_t* data, int width, int height)

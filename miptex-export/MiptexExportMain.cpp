@@ -4,6 +4,7 @@
 #include <StbImage.h>
 #include <PaletteImage.h>
 #include <QuakePalette.h>
+#include <WriteImage.h>
 
 #include <molecular/util/FileStreamStorage.h>
 #include <molecular/util/StringUtils.h>
@@ -48,6 +49,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MIPTEX file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering");
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
+	CommandLineParser::Option<std::string> previewOutput(cmd, "preview-output", "Write quantized image back to file");
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -70,7 +72,6 @@ int Main(int argc, char** argv)
 	}
 
 	FileWriteStorage outFile(outFileName->c_str());
-	MiptexFile outMiptexFile(outFile);
 	StbImage textureImage(inFileName->c_str(), 4);
 	const auto width = textureImage.GetWidth();
 	const auto height = textureImage.GetHeight();
@@ -85,6 +86,14 @@ int Main(int argc, char** argv)
 
 	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, paletteData, dither);
 	SetTransparency(indexedImage, alpha);
+
+	if(previewOutput)
+	{
+		auto previewImage = ConvertToRgb(indexedImage.data(), width, height, paletteData);
+		WriteRgbImage(previewOutput->c_str(), previewImage.data(), width, height);
+	}
+
+	MiptexFile outMiptexFile(outFile);
 	outMiptexFile.WriteHeader(StringUtils::FileNameWithoutExtension(*inFileName).c_str(), width, height);
 	outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 

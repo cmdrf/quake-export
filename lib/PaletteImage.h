@@ -29,6 +29,10 @@ SOFTWARE.
 #include <cstdint>
 #include <vector>
 
+/// Convert RGB image to indexed image with given palette
 std::vector<uint8_t> ConvertToIndexed(const uint8_t* image, int width, int height, const uint8_t* palette, bool dither = true);
+
+/// Convert indexed image to RGB image with given palette
+std::vector<uint8_t> ConvertToRgb(const uint8_t* indexed, int width, int height, const uint8_t* palette);
 
 #endif // PALETTEIMAGE_H

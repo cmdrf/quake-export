@@ -7,7 +7,10 @@ add_library(quake-export
 	QuakePalette.h
 	StbImage.cpp
 	StbImage.h
+	WriteImage.cpp
+	WriteImage.h
 	../3rdparty/stb_image.h
+	../3rdparty/stb_image_write.h
 )
 
 target_link_libraries(quake-export PUBLIC

@@ -141,3 +141,21 @@ std::vector<uint8_t> ConvertToIndexed(const uint8_t* image, int width, int heigh
 		rgbPalette[i] = RGB{palette[3*i], palette[3*i + 1], palette[3*i + 2]};
 	return ConvertToIndexed(rgbImage, width, height, rgbPalette, dither);
 }
+
+std::vector<uint8_t> ConvertToRgb(const uint8_t* indexed, int width, int height, const uint8_t* palette)
+{
+	std::vector<uint8_t> rgbImage;
+	rgbImage.reserve(width * height * 3); // Preallocate memory
+
+	for (int i = 0; i < width * height; ++i)
+	{
+		uint8_t index = indexed[i];
+
+		// For each indexed pixel, fetch the RGB values from the palette and add to the RGB image
+		rgbImage.push_back(palette[index * 3]);       // R
+		rgbImage.push_back(palette[index * 3 + 1]);   // G
+		rgbImage.push_back(palette[index * 3 + 2]);   // B
+	}
+
+	return rgbImage;
+}

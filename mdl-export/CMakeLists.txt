@@ -2,6 +2,10 @@ add_executable(mdl-export
 	MdlExportMain.cpp
 	MdlFile.cpp
 	MdlFile.h
+	MdlJson.cpp
+	MdlJson.h
+	MdlUtils.cpp
+	MdlUtils.h
 	QuakeNormal.cpp
 	QuakeNormal.h
 )

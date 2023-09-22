@@ -61,11 +61,15 @@ public:
 		uint8_t lightNormalIndex;
 	};
 
+	/** Can be either a single frame or part of a frame group. */
 	struct SimpleFrame
 	{
 		TriangleVertex min;
 		TriangleVertex max;
+
+		/** A maximum of 16 characters are written to the file. */
 		std::string name;
+
 		std::vector<TriangleVertex> vertices;
 	};
 
@@ -73,7 +77,8 @@ public:
 
 	void WriteHeader(const Header& header);
 	void WriteSkin(const uint8_t* skin);
-	void WriteSkinGroup(std::vector<float> times, const std::vector<uint8_t*>& skins);
+	void WriteSkinGroup(const std::vector<float>& times, const std::vector<const uint8_t*>& skins);
+	void WriteSkinGroup(const std::vector<float>& times, const std::vector<std::vector<uint8_t>>& skins);
 	void WriteStVertex(bool onSeam, uint32_t s, uint32_t t);
 	void WriteTriangle(bool facesFront, const uint32_t vertices[3]);
 	void WriteSingleFrame(const SimpleFrame& frame);

@@ -50,7 +50,7 @@ void MdlFile::WriteSkin(const uint8_t* skin)
 	mStorage.Write(skin, mHeader.skinHeight * mHeader.skinWidth);
 }
 
-void MdlFile::WriteSkinGroup(std::vector<float> times, const std::vector<uint8_t*>& skins)
+void MdlFile::WriteSkinGroup(const std::vector<float>& times, const std::vector<const uint8_t*>& skins)
 {
 	assert(mCurrentSection == SKINS);
 	assert(times.size() == skins.size());
@@ -61,6 +61,15 @@ void MdlFile::WriteSkinGroup(std::vector<float> times, const std::vector<uint8_t
 	mStorage.Write(times.data(), times.size() * 4);
 	for(auto skin: skins)
 		mStorage.Write(skin, mHeader.skinHeight * mHeader.skinWidth);
+}
+
+void MdlFile::WriteSkinGroup(const std::vector<float>& times, const std::vector<std::vector<uint8_t>>& skins)
+{
+	std::vector<const uint8_t*> skinPointers;
+	skinPointers.reserve(skins.size());
+	for(auto& skin: skins)
+		skinPointers.push_back(skin.data());
+	WriteSkinGroup(times, skinPointers);
 }
 
 void MdlFile::WriteStVertex(bool onSeam, uint32_t s, uint32_t t)

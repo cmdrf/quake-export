@@ -1,0 +1,36 @@
+{
+	"mesh": "main-mesh.obj",
+	"skins": [
+		{
+			"image": "abc.png"
+		},
+		[
+			{
+				"time": 123,
+				"image": "abc1.png"
+			},
+			{
+				"time": 234,
+				"image": "abc2.png"
+			}
+		]
+	],
+	"frames": [
+		{
+			"name": "mysimpleframe",
+			"mesh": "bcd.obj"
+		},
+		[
+			{
+				"time": 123,
+				"name": "mygroup1-frame1",
+				"mesh": "bcd1.obj"
+			},
+			{
+				"time": 124,
+				"name": "mygroup1-frame2",
+				"mesh": "bcd2.obj"
+			}
+		]
+	]
+}

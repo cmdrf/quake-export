@@ -125,10 +125,11 @@ int main(int argc, char** argv)
 			std::cout << name << "\"\n";
 			file.Skip(header.numVerts * 4); // Skip vertices
 		}
-		else
+		else // Frame group
 		{
 			uint32_t numberOfFrames;
 			stream.Read(numberOfFrames);
+			file.Skip(8); // Skip frame group min/max
 			std::cout << "frame group (" << numberOfFrames << " frames). times: [";
 			for(unsigned int s = 0; s < numberOfFrames; ++s)
 			{
@@ -139,7 +140,7 @@ int main(int argc, char** argv)
 			std::cout << "], names: [";
 			for(unsigned int f = 0; f < numberOfFrames; ++f)
 			{
-				file.Skip(8); // Skip min/max
+				file.Skip(8); // Skip frame min/max
 				char name[17] = {0};
 				file.Read(name, 16);
 				std::cout << name << ", ";

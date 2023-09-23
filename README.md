@@ -5,7 +5,7 @@ Command line utilities for converting files into various Quake formats.
 
 Converts OBJ meshes into Quake MDL meshes. Multiple frames and skins can be specified by passing a JSON description instead of just an OBJ file.
 
-Skin groups and frame groups are also supported, but they don't seem to be used by Quake.
+Skin groups and frame groups are also supported.
 
 ## miptex-export
 

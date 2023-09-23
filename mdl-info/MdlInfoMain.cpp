@@ -100,7 +100,9 @@ int main(int argc, char** argv)
 			{
 				float time;
 				stream.Read(time);
-				std::cout << time << ", ";
+				if(s > 0)
+					std::cout << ", ";
+				std::cout << time;
 			}
 			std::cout << "]\n";
 			file.Skip(numberOfSkins * header.skinWidth * header.skinHeight);
@@ -135,7 +137,9 @@ int main(int argc, char** argv)
 			{
 				float time;
 				stream.Read(time);
-				std::cout << time << ", ";
+				if(s > 0)
+					std::cout << ", ";
+				std::cout << time;
 			}
 			std::cout << "], names: [";
 			for(unsigned int f = 0; f < numberOfFrames; ++f)
@@ -143,7 +147,9 @@ int main(int argc, char** argv)
 				file.Skip(8); // Skip frame min/max
 				char name[17] = {0};
 				file.Read(name, 16);
-				std::cout << name << ", ";
+				if(f > 0)
+					std::cout << ", ";
+				std::cout << name;
 				file.Skip(header.numVerts * 4); // Skip vertices
 			}
 			std::cout << "]\n";

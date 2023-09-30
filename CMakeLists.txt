@@ -11,4 +11,5 @@ add_subdirectory(miptex-export)
 add_subdirectory(picture-export)
 add_subdirectory(picture-import)
 add_subdirectory(wad-export)
+add_subdirectory(wad-info)
 

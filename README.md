@@ -15,6 +15,10 @@ Convert images into MIPTEX files. These usually are embedded into WADs or BSPs. 
 - Alpha transparency support. Alpha values below 50% are mapped to index 255 in the texture.
 - Optional custom palette.
 
+## quake-picture-export
+
+Convert images to Quake picture lumps for menus etc.
+
 ## wad-export
 
 Archive MIPTEX files into a single WAD file.

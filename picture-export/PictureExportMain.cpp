@@ -1,7 +1,8 @@
 #include <LoadPalette.h>
-#include <StbImage.h>
 #include <PaletteImage.h>
 #include <QuakePalette.h>
+#include <StbImage.h>
+#include <Transparency.h>
 
 #include <molecular/util/CommandLineParser.h>
 #include <molecular/util/FileStreamStorage.h>
@@ -30,11 +31,13 @@ int Main(int argc, char** argv)
 		paletteData = loadedPalette.data();
 	}
 
-	StbImage textureImage(inFileName->c_str(), 3);
+	StbImage textureImage(inFileName->c_str(), 4);
 	const int32_t width = textureImage.GetWidth();
 	const int32_t height = textureImage.GetHeight();
 
-	std::vector<uint8_t> indexedImage = ConvertToIndexed(textureImage.Data(), width, height, paletteData, dither);
+	auto [color, alpha] = SplitColorAndAlpha(textureImage.Data(), width, height);
+	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, paletteData, dither);
+	SetTransparency(indexedImage, alpha);
 
 	FileWriteStorage outFile(outFileName->c_str());
 	outFile.Write(&width, 4);

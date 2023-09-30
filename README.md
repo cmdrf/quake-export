@@ -19,6 +19,10 @@ Convert images into MIPTEX files. These usually are embedded into WADs or BSPs. 
 
 Convert images to Quake picture lumps for menus etc.
 
+## quake-picture-import
+
+Convert Quake picture lumps to proper image files.
+
 ## wad-export
 
 Archive MIPTEX files into a single WAD file.

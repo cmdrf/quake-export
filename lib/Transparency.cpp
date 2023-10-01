@@ -1,5 +1,8 @@
 #include "Transparency.h"
 
+#include <cassert>
+#include <cstddef>
+
 std::pair<std::vector<uint8_t>, std::vector<uint8_t>> SplitColorAndAlpha(const uint8_t* data, int width, int height)
 {
 	std::pair<std::vector<uint8_t>, std::vector<uint8_t>> out;

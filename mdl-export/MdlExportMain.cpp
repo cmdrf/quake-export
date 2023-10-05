@@ -27,7 +27,7 @@ SOFTWARE.
 #include "MdlFile.h"
 #include "MdlJson.h"
 #include "MdlUtils.h"
-#include <PaletteImage.h>
+#include <TextureImage.h>
 #include <QuakePalette.h>
 #include <StbImage.h>
 
@@ -88,8 +88,8 @@ void WriteSimpleMdl(
 
 void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const uint8_t* paletteData, bool dither)
 {
-	StbImage textureImage(texturePath.c_str(), 3);
-	auto skin = ConvertToIndexed(textureImage.Data(), textureImage.GetWidth(), textureImage.GetHeight(), paletteData, dither);
+	TextureImage textureImage(texturePath.c_str());
+	auto skin = textureImage.ToIndexed(paletteData, dither);
 
 	std::vector<uint32_t> indices;
 	std::vector<Vector3> positions;
@@ -133,14 +133,16 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, MdlJson::SimpleSkin>)
 			{
-				auto indexedSkin = ConvertToIndexed(arg.rgbData.data(), arg.width, arg.height, paletteData, dither);
+				auto indexedSkin = arg.ToIndexed(paletteData, dither);
 				mdl.WriteSkin(indexedSkin.data());
 			}
 			else if constexpr (std::is_same_v<T, MdlJson::SkinGroup>)
 			{
 				std::vector<std::vector<uint8_t>> skins;
 				for(auto& skin: arg.skins)
-					skins.push_back(ConvertToIndexed(skin.rgbData.data(), skin.width, skin.height, paletteData, dither));
+				{
+					skins.push_back(skin.ToIndexed(paletteData, dither));
+				}
 				mdl.WriteSkinGroup(arg.times, skins);
 			}
 		}, skin);

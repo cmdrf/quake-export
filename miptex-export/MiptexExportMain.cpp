@@ -3,16 +3,13 @@
 #include <LoadPalette.h>
 #include <PaletteImage.h>
 #include <QuakePalette.h>
-#include <StbImage.h>
+#include <TextureImage.h>
 #include <Transparency.h>
 #include <WriteImage.h>
 
 #include <molecular/util/FileStreamStorage.h>
 #include <molecular/util/StringUtils.h>
 #include <molecular/util/CommandLineParser.h>
-
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "stb_image_resize.h"
 
 using namespace molecular;
 using namespace molecular::util;
@@ -47,7 +44,7 @@ int Main(int argc, char** argv)
 	}
 
 	FileWriteStorage outFile(outFileName->c_str());
-	StbImage textureImage(inFileName->c_str(), 4);
+	TextureImage textureImage(inFileName->c_str());
 	const auto width = textureImage.GetWidth();
 	const auto height = textureImage.GetHeight();
 
@@ -57,35 +54,19 @@ int Main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	auto [color, alpha] = SplitColorAndAlpha(textureImage.Data(), width, height);
-
-	std::vector<uint8_t> indexedImage = ConvertToIndexed(color.data(), width, height, paletteData, dither);
-	SetTransparency(indexedImage, alpha);
-
-	if(previewOutput)
-	{
-		auto previewImage = ConvertToRgb(indexedImage.data(), width, height, paletteData);
-		WriteRgbImage(previewOutput->c_str(), previewImage.data(), width, height);
-	}
-
 	MiptexFile outMiptexFile(outFile);
 	outMiptexFile.WriteHeader(StringUtils::FileNameWithoutExtension(*inFileName).c_str(), width, height);
-	outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 
-	int newWidth = width / 2;
-	int newHeight = height / 2;
-	for(int i = 0; i < 3; ++i)
+	for(int i = 0; i < 4; ++i)
 	{
-		std::vector<uint8_t> newImage(newWidth * newHeight * 4);
-		stbir_resize_uint8_srgb_edgemode(textureImage.Data(), width, height, width * 4, newImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
-		auto [color, alpha] = SplitColorAndAlpha(newImage.data(), newWidth, newHeight);
-
-		indexedImage = ConvertToIndexed(color.data(), newWidth, newHeight, paletteData, dither);
-		SetTransparency(indexedImage, alpha);
+		auto indexedImage = textureImage.ToIndexed(paletteData, dither, i);
 		outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 
-		newWidth /= 2;
-		newHeight /= 2;
+		if(i == 0 && previewOutput)
+		{
+			auto previewImage = ConvertToRgb(indexedImage.data(), width, height, paletteData);
+			WriteRgbImage(previewOutput->c_str(), previewImage.data(), width, height);
+		}
 	}
 
 	return EXIT_SUCCESS;

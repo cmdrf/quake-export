@@ -1,6 +1,7 @@
 #ifndef MDLJSON_H
 #define MDLJSON_H
 
+#include "TextureImage.h"
 #include <molecular/util/Vector3.h>
 
 #include <vector>
@@ -10,12 +11,7 @@ namespace MdlJson
 {
 
 /// Single skin
-struct SimpleSkin
-{
-	unsigned int width;
-	unsigned int height;
-	std::vector<uint8_t> rgbData;
-};
+using SimpleSkin = TextureImage;
 
 /// Group of skins for animation
 struct SkinGroup

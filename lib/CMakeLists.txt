@@ -7,6 +7,8 @@ add_library(quake-export
 	QuakePalette.h
 	StbImage.cpp
 	StbImage.h
+	TextureImage.cpp
+	TextureImage.h
 	Transparency.cpp
 	Transparency.h
 	WriteImage.cpp

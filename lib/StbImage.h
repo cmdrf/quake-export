@@ -14,8 +14,12 @@ public:
 	/// Load from memory
 	StbImage(uint8_t const* data, size_t size, int desiredChannels);
 
-	StbImage(StbImage&) = delete;
+	StbImage(const StbImage&) = delete;
+	StbImage(StbImage&& other);
 	~StbImage();
+
+	StbImage& operator=(const StbImage&) = delete;
+	StbImage& operator=(StbImage&& other);
 
 	const uint8_t* Data() const {return mData;}
 	int GetWidth() const {return mWidth;}

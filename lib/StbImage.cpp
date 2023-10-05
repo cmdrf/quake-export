@@ -23,7 +23,27 @@ StbImage::StbImage(uint8_t const* data, size_t size, int desiredChannels)
 		throw std::runtime_error("Could not load image data");
 }
 
+StbImage::StbImage(StbImage&& other) :
+	mData(other.mData),
+	mWidth(other.mWidth),
+	mHeight(other.mHeight),
+	mChannelsInFile(other.mChannelsInFile)
+{
+	other.mData = nullptr;
+}
+
 StbImage::~StbImage()
 {
-	stbi_image_free(mData);
+	if(mData)
+		stbi_image_free(mData);
+}
+
+StbImage& StbImage::operator=(StbImage&& other)
+{
+	mData = other.mData;
+	mWidth = other.mWidth;
+	mHeight = other.mHeight;
+	mChannelsInFile = other.mChannelsInFile;
+	other.mData = nullptr;
+	return *this;
 }

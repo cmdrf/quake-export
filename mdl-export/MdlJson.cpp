@@ -1,6 +1,5 @@
 #include "MdlJson.h"
 #include "MdlUtils.h"
-#include "StbImage.h"
 
 #include <nlohmann/json.hpp>
 
@@ -16,14 +15,10 @@ namespace MdlJson
 
 static SimpleSkin ReadSkin(const json& skin)
 {
-	SimpleSkin out;
 	std::string image = skin.at("image");
-
-	StbImage textureImage(image.c_str(), 3);
-	out.width = textureImage.GetWidth();
-	out.height = textureImage.GetHeight();
-	out.rgbData.resize(out.width * out.height * 3);
-	memcpy(out.rgbData.data(), textureImage.Data(), out.rgbData.size());
+	SimpleSkin out {
+		TextureImage(image.c_str())
+	};
 	return out;
 }
 
@@ -67,7 +62,7 @@ Data Read(const std::string& filename)
 			// Read images:
 			for (const auto &inner_skin : skin)
 				group.skins.push_back(ReadSkin(inner_skin));
-			out.skins.push_back(group);
+			out.skins.push_back(std::move(group));
 		}
 		else
 			throw std::runtime_error("Unexpected skin element");
@@ -77,7 +72,7 @@ Data Read(const std::string& filename)
 	for (const auto &frame : j["frames"])
 	{
 		if (frame.is_object())
-				out.frames.push_back(ReadFrame(frame));
+			out.frames.push_back(ReadFrame(frame));
 		else if (frame.is_array())
 		{
 			FrameGroup group;
@@ -128,23 +123,23 @@ std::pair<unsigned int, unsigned int> Data::GetSkinWidthHeight()
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, MdlJson::SimpleSkin>)
 			{
-				if(skinWidth != 0 && skinWidth != arg.width)
+				if(skinWidth != 0 && skinWidth != arg.GetWidth())
 					throw std::runtime_error("Skin widths don't match");
-				if(skinHeight != 0 && skinHeight != arg.height)
+				if(skinHeight != 0 && skinHeight != arg.GetHeight())
 					throw std::runtime_error("Skin heights don't match");
-				skinWidth = arg.width;
-				skinHeight = arg.height;
+				skinWidth = arg.GetWidth();
+				skinHeight = arg.GetHeight();
 			}
 			else if constexpr (std::is_same_v<T, MdlJson::SkinGroup>)
 			{
 				for(auto& skin: arg.skins)
 				{
-					if(skinWidth != 0 && skinWidth != skin.width)
+					if(skinWidth != 0 && skinWidth != skin.GetWidth())
 						throw std::runtime_error("Skin widths don't match");
-					if(skinHeight != 0 && skinHeight != skin.height)
+					if(skinHeight != 0 && skinHeight != skin.GetHeight())
 						throw std::runtime_error("Skin heights don't match");
-					skinWidth = skin.width;
-					skinHeight = skin.height;
+					skinWidth = skin.GetWidth();
+					skinHeight = skin.GetHeight();
 				}
 			}
 		}, skin);

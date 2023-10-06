@@ -26,6 +26,7 @@ SOFTWARE.
 #ifndef PALETTEIMAGE_H
 #define PALETTEIMAGE_H
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

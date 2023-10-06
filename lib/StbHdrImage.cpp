@@ -1,6 +1,8 @@
 #include "StbHdrImage.h"
 
 #include "stb_image.h"
+
+#include <stdexcept>
 #include <string>
 
 StbHdrImage::StbHdrImage(const char* filename, int desired_channels)

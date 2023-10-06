@@ -83,7 +83,7 @@ static uint8_t FindClosestPaletteColor(const RGB& color, const std::vector<RGB>&
 uint8_t FindClosestPaletteColor(const uint8_t rgbPixel[3], const uint8_t* palette, size_t paletteSize)
 {
 	size_t closestIndex = 0;
-	unsigned long closestDistance = ULONG_MAX;
+	unsigned long closestDistance = std::numeric_limits<unsigned long>::max();
 
 	for (size_t i = 0; i < paletteSize; ++i)
 	{

@@ -2,12 +2,13 @@
 #include "PaletteImage.h"
 #include "Transparency.h"
 
-#include <iostream>
 #include <stb_image.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize.h>
 
+#include <algorithm>
 #include <cmath>
+#include <iostream>
 
 TextureImage::TextureImage(const char* filename)
 {

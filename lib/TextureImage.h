@@ -4,6 +4,7 @@
 #include "StbImage.h"
 #include "StbHdrImage.h"
 
+#include <memory>
 #include <vector>
 
 class TextureImage

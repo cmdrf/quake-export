@@ -21,6 +21,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MIPTEX file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering");
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
+	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
 	CommandLineParser::Option<std::string> previewOutput(cmd, "preview-output", "Write quantized image back to file");
 	CommandLineParser::HelpFlag help(cmd);
 
@@ -59,7 +60,7 @@ int Main(int argc, char** argv)
 
 	for(int i = 0; i < 4; ++i)
 	{
-		auto indexedImage = textureImage.ToIndexed(paletteData, dither, i);
+		auto indexedImage = textureImage.ToIndexed(paletteData, dither, i, *hdrScale);
 		outMiptexFile.WriteMip(indexedImage.data(), indexedImage.size());
 
 		if(i == 0 && previewOutput)

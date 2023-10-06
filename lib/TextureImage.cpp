@@ -18,7 +18,7 @@ TextureImage::TextureImage(const char* filename)
 
 }
 
-std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither, int mipLevel)
+std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither, int mipLevel, float hdrScale)
 {
 	std::vector<uint8_t> indexedImage;
 	if(mHdrImage)
@@ -30,14 +30,11 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 		std::vector<uint8_t> ldrImage(pixelCount * 3);
 		for(int i = 0; i < pixelCount * 3; ++i)
 		{
-			float value = std::pow(data[i] * 2, 2.2) * 255 + 0.5f;
+			const float value = std::pow(data[i] * hdrScale, 2.2f) * 255 + 0.5f;
 			if(value < 0)
 				ldrImage[i] = 0;
 			else if(value > 255.0f)
-			{
 				ldrImage[i] = 255;
-				// TODO: Fullbright
-			}
 			else
 				ldrImage[i] = value;
 		}
@@ -61,6 +58,27 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 		}
 
 		indexedImage = ConvertToIndexed(imageData, width, height, palette, dither);
+
+		pixelCount = width * height;
+		for(int i = 0; i < pixelCount; ++i)
+		{
+			float rgb[3] = {
+				std::pow(data[i*3] * hdrScale, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+1] * hdrScale, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+2] * hdrScale, 2.2f) * 255.f + 0.5f
+			};
+			if(rgb[0] > 255.f || rgb[1] > 255.f || rgb[2] > 255.f)
+			{
+				// Fullbright
+				const float fullbrightOffset = 128.f;
+				uint8_t rgbi[3] = {
+					static_cast<uint8_t>(std::clamp<int>(rgb[0] - fullbrightOffset, 0, 255)),
+					static_cast<uint8_t>(std::clamp<int>(rgb[1] - fullbrightOffset, 0, 255)),
+					static_cast<uint8_t>(std::clamp<int>(rgb[2] - fullbrightOffset, 0, 255)),
+				};
+				indexedImage[i] = FindClosestPaletteColor(rgbi, palette + 240, 15);
+			}
+		}
 	}
 	else
 	{

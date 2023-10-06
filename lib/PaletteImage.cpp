@@ -64,7 +64,7 @@ static double Distance(const RGB& a, const RGB& b)
 				(a.b - b.b) * (a.b - b.b));
 }
 
-uint8_t FindClosestPaletteColor(const RGB& color, const std::vector<RGB>& palette)
+static uint8_t FindClosestPaletteColor(const RGB& color, const std::vector<RGB>& palette)
 {
 	double minDist = 1e9;
 	uint8_t index = 0;
@@ -78,6 +78,33 @@ uint8_t FindClosestPaletteColor(const RGB& color, const std::vector<RGB>& palett
 		}
 	}
 	return index;
+}
+
+uint8_t FindClosestPaletteColor(const uint8_t rgbPixel[3], const uint8_t* palette, size_t paletteSize)
+{
+	size_t closestIndex = 0;
+	unsigned long closestDistance = ULONG_MAX;
+
+	for (size_t i = 0; i < paletteSize; ++i)
+	{
+		uint8_t r = palette[i * 3];
+		uint8_t g = palette[i * 3 + 1];
+		uint8_t b = palette[i * 3 + 2];
+
+		long dr = (long) rgbPixel[0] - r;
+		long dg = (long) rgbPixel[1] - g;
+		long db = (long) rgbPixel[2] - b;
+
+		unsigned long distance = dr * dr + dg * dg + db * db;
+
+		if (distance < closestDistance)
+		{
+			closestDistance = distance;
+			closestIndex = i;
+		}
+	}
+
+	return (uint8_t) closestIndex;
 }
 
 std::vector<uint8_t> ConvertToIndexed(const std::vector<RGB>& image, int width, int height, const std::vector<RGB>& palette, bool dither)

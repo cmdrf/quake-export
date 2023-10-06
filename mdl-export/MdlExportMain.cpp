@@ -86,10 +86,10 @@ void WriteSimpleMdl(
 	mdl.WriteSingleFrame(frame);
 }
 
-void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const uint8_t* paletteData, bool dither)
+void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const uint8_t* paletteData, bool dither, float hdrScale)
 {
 	TextureImage textureImage(texturePath.c_str());
-	auto skin = textureImage.ToIndexed(paletteData, dither);
+	auto skin = textureImage.ToIndexed(paletteData, dither, 0, hdrScale);
 
 	std::vector<uint32_t> indices;
 	std::vector<Vector3> positions;
@@ -101,7 +101,7 @@ void ProcessStaticModel(const std::string& objPath, const std::string& outputPat
 }
 
 
-void ProcessComplexModel(const std::string& jsonPath, const std::string& outputPath, const uint8_t* paletteData, bool dither)
+void ProcessComplexModel(const std::string& jsonPath, const std::string& outputPath, const uint8_t* paletteData, bool dither, float hdrScale)
 {
 	MdlJson::Data data = MdlJson::Read(jsonPath);
 
@@ -133,7 +133,7 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 			using T = std::decay_t<decltype(arg)>;
 			if constexpr (std::is_same_v<T, MdlJson::SimpleSkin>)
 			{
-				auto indexedSkin = arg.ToIndexed(paletteData, dither);
+				auto indexedSkin = arg.ToIndexed(paletteData, dither, 0, hdrScale);
 				mdl.WriteSkin(indexedSkin.data());
 			}
 			else if constexpr (std::is_same_v<T, MdlJson::SkinGroup>)
@@ -141,7 +141,7 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 				std::vector<std::vector<uint8_t>> skins;
 				for(auto& skin: arg.skins)
 				{
-					skins.push_back(skin.ToIndexed(paletteData, dither));
+					skins.push_back(skin.ToIndexed(paletteData, dither, 0, hdrScale));
 				}
 				mdl.WriteSkinGroup(arg.times, skins);
 			}
@@ -214,6 +214,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering for textures");
 	CommandLineParser::Option<std::string> texture(cmd, "texture", "Texture to use", "");
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
+	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -243,11 +244,11 @@ int Main(int argc, char** argv)
 			return EXIT_FAILURE;
 		}
 
-		ProcessStaticModel(*inFileName, *outFileName, *texture, paletteData, dither);
+		ProcessStaticModel(*inFileName, *outFileName, *texture, paletteData, dither, *hdrScale);
 	}
 	else if(StringUtils::EndsWith(*inFileName, ".json"))
 	{
-		ProcessComplexModel(*inFileName, *outFileName, paletteData, dither);
+		ProcessComplexModel(*inFileName, *outFileName, paletteData, dither, *hdrScale);
 	}
 	else
 		throw std::runtime_error("Unrecognized input file type");

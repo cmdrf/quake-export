@@ -14,7 +14,7 @@ public:
 	int GetWidth() const {return mImage ? mImage->GetWidth() : mHdrImage->GetWidth();}
 	int GetHeight() const {return mImage ? mImage->GetHeight() : mHdrImage->GetHeight();}
 
-	std::vector<uint8_t> ToIndexed(const uint8_t* palette, bool dither, int mipLevel = 0);
+	std::vector<uint8_t> ToIndexed(const uint8_t* palette, bool dither, int mipLevel = 0, float hdrScale = 1);
 
 private:
 	std::unique_ptr<StbImage> mImage;

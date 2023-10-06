@@ -29,6 +29,8 @@ SOFTWARE.
 #include <cstdint>
 #include <vector>
 
+uint8_t FindClosestPaletteColor(const uint8_t rgbPixel[3], const uint8_t* palette, size_t paletteSize);
+
 /// Convert RGB image to indexed image with given palette
 std::vector<uint8_t> ConvertToIndexed(const uint8_t* image, int width, int height, const uint8_t* palette, bool dither = true);
 

@@ -27,7 +27,7 @@ public:
 	int GetChannelsInFile() const {return mChannelsInFile;}
 
 private:
-	uint8_t* mData;
+	uint8_t* mData = nullptr;
 	int mWidth = 0;
 	int mHeight = 0;
 	int mChannelsInFile = 0;

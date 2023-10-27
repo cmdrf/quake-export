@@ -82,7 +82,7 @@ void MdlFile::WriteStVertex(bool onSeam, uint32_t s, uint32_t t)
 	mCurrentSection = ST_VERTICES;
 }
 
-void MdlFile::WriteTriangle(bool facesFront, const uint32_t vertices[])
+void MdlFile::WriteTriangle(const uint32_t vertices[], bool facesFront)
 {
 	assert(mCurrentSection == ST_VERTICES || mCurrentSection == TRIANGLES);
 	const uint32_t front = facesFront ? 1 : 0;

@@ -43,6 +43,17 @@ SOFTWARE.
 using namespace molecular;
 using namespace molecular::util;
 
+/// OBJ triangles are counter-clockwise, MDL triangles clockwise...
+static void WriteReversedTriangle(MdlFile& mdl, const uint32_t indices[3])
+{
+	const uint32_t reversedIndices[3] = {
+		indices[2],
+		indices[1],
+		indices[0]
+	};
+	mdl.WriteTriangle(reversedIndices);
+}
+
 void WriteSimpleMdl(
 		const std::vector<uint32_t>& indices,
 		const std::vector<Vector3>& positions,
@@ -76,7 +87,7 @@ void WriteSimpleMdl(
 	for(auto& uv: uvs)
 		mdl.WriteStVertex(false, uv[0] * skinWidth, uv[1] * skinHeight);
 	for(size_t i = 0; i < indices.size(); i += 3)
-		mdl.WriteTriangle(true, indices.data() + i);
+		WriteReversedTriangle(mdl, indices.data() + i);
 	MdlFile::SimpleFrame frame;
 	frame.vertices = ToTriangleVertices(positions, normals, header.origin, header.scale);
 	auto [minV, maxV] = GetMinMax(frame.vertices);
@@ -151,7 +162,7 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 	for(auto& uv: data.mainUvs)
 		mdl.WriteStVertex(false, uv[0] * skinWidth, uv[1] * skinHeight);
 	for(size_t i = 0; i < data.mainIndices.size(); i += 3)
-		mdl.WriteTriangle(true, data.mainIndices.data() + i);
+		WriteReversedTriangle(mdl, data.mainIndices.data() + i);
 
 	// Write frames:
 	for(auto& frame: data.frames)

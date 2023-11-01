@@ -77,7 +77,7 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 					static_cast<uint8_t>(std::clamp<int>(rgb[1] - fullbrightOffset, 0, 255)),
 					static_cast<uint8_t>(std::clamp<int>(rgb[2] - fullbrightOffset, 0, 255)),
 				};
-				indexedImage[i] = FindClosestPaletteColor(rgbi, palette + 240, 15);
+				indexedImage[i] = FindClosestPaletteColor(rgbi, palette + 240*3, 15) + 240;
 			}
 		}
 	}

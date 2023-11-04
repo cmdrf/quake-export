@@ -24,24 +24,14 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 	std::vector<uint8_t> indexedImage;
 	if(mHdrImage)
 	{
+		if(dither)
+			throw std::runtime_error("Dither with HDR not supported");
+
 		const float* data = mHdrImage->Data();
 		int32_t width = mHdrImage->GetWidth();
 		int32_t height = mHdrImage->GetHeight();
-		unsigned int pixelCount = width * height;
-		std::vector<uint8_t> ldrImage(pixelCount * 3);
-		for(int i = 0; i < pixelCount * 3; ++i)
-		{
-			const float value = std::pow(data[i] * hdrScale, 2.2f) * 255 + 0.5f;
-			if(value < 0)
-				ldrImage[i] = 0;
-			else if(value > 255.0f)
-				ldrImage[i] = 255;
-			else
-				ldrImage[i] = value;
-		}
 
-		const uint8_t* imageData = ldrImage.data();
-		std::vector<uint8_t> scaledImage;
+		std::vector<float> scaledImage;
 		if(mipLevel != 0)
 		{
 			int32_t newWidth = width;
@@ -52,16 +42,18 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 				newHeight /= 2;
 			}
 			scaledImage.resize(newWidth * newHeight * 4);
-			stbir_resize_uint8_srgb_edgemode(ldrImage.data(), width, height, width * 4, scaledImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
-			imageData = scaledImage.data();
+			stbir_resize_float_generic(data, width, height, 0, scaledImage.data(), newWidth, newHeight, 0, 3, STBIR_ALPHA_CHANNEL_NONE, 0, STBIR_EDGE_WRAP, STBIR_FILTER_DEFAULT, STBIR_COLORSPACE_LINEAR, nullptr);
+
+			// Use new image data and size from here:
+			data = scaledImage.data();
 			width = newWidth;
 			height = newHeight;
 		}
 
-		indexedImage = ConvertToIndexed(imageData, width, height, palette, dither);
+		indexedImage.resize(width * height);
 
-		pixelCount = width * height;
-		for(int i = 0; i < pixelCount; ++i)
+		// Iterate over all pixels:
+		for(int i = 0; i < width * height; ++i)
 		{
 			float rgb[3] = {
 				std::pow(data[i*3] * hdrScale, 2.2f) * 255.f + 0.5f,
@@ -78,6 +70,15 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 					static_cast<uint8_t>(std::clamp<int>(rgb[2] - fullbrightOffset, 0, 255)),
 				};
 				indexedImage[i] = FindClosestPaletteColor(rgbi, palette + 240*3, 15) + 240;
+			}
+			else
+			{
+				uint8_t rgbi[3] = {
+					static_cast<uint8_t>(std::clamp<int>(rgb[0], 0, 255)),
+					static_cast<uint8_t>(std::clamp<int>(rgb[1], 0, 255)),
+					static_cast<uint8_t>(std::clamp<int>(rgb[2], 0, 255)),
+				};
+				indexedImage[i] = FindClosestPaletteColor(rgbi, palette, 240);
 			}
 		}
 	}

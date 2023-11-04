@@ -174,7 +174,7 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 				if(arg.positions.size() != data.mainPositions.size())
 				{
 					std::ostringstream oss;
-					oss << "Vertex count varies between frames. " << arg.positions.size() << " vs. " << data.mainPositions.size();
+					oss << "Vertex count varies between frames. " << arg.positions.size() << " (" << arg.name << ") vs. " << data.mainPositions.size() << " (main)";
 					throw std::runtime_error(oss.str());
 				}
 				MdlFile::SimpleFrame frame;

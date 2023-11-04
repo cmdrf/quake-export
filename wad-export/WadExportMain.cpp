@@ -55,12 +55,24 @@ int Main(int argc, char** argv)
 
 	for(auto& fileName: *remaining)
 	{
-		auto name = StringUtils::FileNameWithoutExtension(fileName);
 		FileReadStorage file(fileName);
 		size_t size = file.GetSize();
 		std::vector<uint8_t> fileData(size);
 		file.Read(fileData.data(), size);
-		wadFile.AddFile(name.c_str(), IdentifyFile(fileData), fileData.data(), size);
+		auto fileType = IdentifyFile(fileData);
+		if(fileType == WadFile::MIPTEX)
+		{
+			// Get name embedded in file header:
+			char miptexName[17] = {0};
+			std::memcpy(miptexName, fileData.data(), 16);
+			wadFile.AddFile(miptexName, fileType, fileData.data(), size);
+		}
+		else
+		{
+			// Use file name without extension:
+			auto nameWithoutExtension = StringUtils::FileNameWithoutExtension(fileName);
+			wadFile.AddFile(nameWithoutExtension.c_str(), fileType, fileData.data(), size);
+		}
 	}
 
 	wadFile.Finish();

@@ -23,6 +23,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
 	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
 	CommandLineParser::Option<std::string> previewOutput(cmd, "preview-output", "Write quantized image back to file");
+	CommandLineParser::Option<std::string> nameOption(cmd, "name", "Name of the texture embedded in file. Defaults to file name without extension.");
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -56,7 +57,8 @@ int Main(int argc, char** argv)
 	}
 
 	MiptexFile outMiptexFile(outFile);
-	outMiptexFile.WriteHeader(StringUtils::FileNameWithoutExtension(*inFileName).c_str(), width, height);
+	const std::string name = nameOption ? *nameOption : StringUtils::FileNameWithoutExtension(*inFileName);
+	outMiptexFile.WriteHeader(name.c_str(), width, height);
 
 	for(int i = 0; i < 4; ++i)
 	{

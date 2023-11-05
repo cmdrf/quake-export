@@ -1,6 +1,10 @@
 # quake-export
 Command line utilities for converting files into various Quake formats.
 
+## quake-colormap-export
+
+Generate colormap.lmp from palette.
+
 ## mdl-export
 
 Converts OBJ meshes into Quake MDL meshes. Multiple frames and skins can be specified by passing a JSON description instead of just an OBJ file.

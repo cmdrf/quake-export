@@ -1,4 +1,4 @@
-add_executable(mdl-export
+add_executable(quake-mdl-export
 	MdlExportMain.cpp
 	MdlFile.cpp
 	MdlFile.h
@@ -10,8 +10,8 @@ add_executable(mdl-export
 	QuakeNormal.h
 )
 
-target_link_libraries(mdl-export PRIVATE
+target_link_libraries(quake-mdl-export PRIVATE
 	quake-export
 )
 
-install(TARGETS mdl-export DESTINATION bin)
+install(TARGETS quake-mdl-export DESTINATION bin)

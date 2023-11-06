@@ -1,11 +1,11 @@
-add_executable(wad-export
+add_executable(quake-wad-export
 	WadExportMain.cpp
 	WadFile.cpp
 	WadFile.h
 )
 
-target_link_libraries(wad-export PRIVATE
+target_link_libraries(quake-wad-export PRIVATE
 	quake-export
 )
 
-install(TARGETS wad-export DESTINATION bin)
+install(TARGETS quake-wad-export DESTINATION bin)

@@ -1,9 +1,9 @@
-add_executable(mdl-info
+add_executable(quake-mdl-info
 	MdlInfoMain.cpp
 )
 
-target_link_libraries(mdl-info PUBLIC
+target_link_libraries(quake-mdl-info PUBLIC
 	molecular::util
 )
 
-install(TARGETS mdl-info DESTINATION bin)
+install(TARGETS quake-mdl-info DESTINATION bin)

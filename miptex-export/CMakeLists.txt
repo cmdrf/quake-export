@@ -1,11 +1,11 @@
-add_executable(miptex-export
+add_executable(quake-miptex-export
 	MiptexExportMain.cpp
 	MiptexFile.cpp
 	MiptexFile.h
 )
 
-target_link_libraries(miptex-export PRIVATE
+target_link_libraries(quake-miptex-export PRIVATE
 	quake-export
 )
 
-install(TARGETS miptex-export DESTINATION bin)
+install(TARGETS quake-miptex-export DESTINATION bin)

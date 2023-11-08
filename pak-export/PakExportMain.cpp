@@ -14,7 +14,7 @@ struct PakHeader
 
 struct PakEntry
 {
-	char filename[50];
+	char filename[56];
 	uint32_t offset;
 	uint32_t size;
 };
@@ -51,17 +51,18 @@ int Main(int argc, char** argv)
 		file.Read(fileData.data(), size);
 
 		PakEntry entry;
-		memset(entry.filename, 0, 50);
-		strncpy(entry.filename, fileName.c_str(), 50);
+		memset(entry.filename, 0, 56);
+		strncpy(entry.filename, fileName.c_str(), 56);
 		entry.size = size;
 		entry.offset = outFile.GetCursor();
 		entries.push_back(entry);
+		outFile.Write(fileData.data(), fileData.size());
 	}
 
 	header.diroffset = outFile.GetCursor();
-	header.dirsize = entries.size();
+	header.dirsize = entries.size() * sizeof(PakEntry);
 
-	outFile.Write(entries.data(), entries.size() * entries.size());
+	outFile.Write(entries.data(), entries.size() * sizeof(PakEntry));
 	outFile.SetCursor(0);
 	outFile.Write(&header, sizeof(PakHeader));
 

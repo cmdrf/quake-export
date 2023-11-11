@@ -97,9 +97,11 @@ void WriteSimpleMdl(
 	mdl.WriteSingleFrame(frame);
 }
 
-void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const uint8_t* paletteData, bool dither, float hdrScale)
+void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const std::string& emissionPath, const uint8_t* paletteData, bool dither, float hdrScale)
 {
 	TextureImage textureImage(texturePath.c_str());
+	if(!emissionPath.empty())
+		textureImage.SetEmission(emissionPath.c_str());
 	auto skin = textureImage.ToIndexed(paletteData, dither, 0, hdrScale);
 
 	std::vector<uint32_t> indices;
@@ -225,6 +227,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering for textures");
 	CommandLineParser::Option<std::string> texture(cmd, "texture", "Texture to use", "");
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
+	CommandLineParser::Option<std::string> emission(cmd, "emission", "Emission texture to use for fullbright colors.");
 	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
 	CommandLineParser::HelpFlag help(cmd);
 
@@ -255,7 +258,7 @@ int Main(int argc, char** argv)
 			return EXIT_FAILURE;
 		}
 
-		ProcessStaticModel(*inFileName, *outFileName, *texture, paletteData, dither, *hdrScale);
+		ProcessStaticModel(*inFileName, *outFileName, *texture, *emission, paletteData, dither, *hdrScale);
 	}
 	else if(StringUtils::EndsWith(*inFileName, ".json"))
 	{

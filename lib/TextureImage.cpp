@@ -12,6 +12,10 @@
 #include <cmath>
 #include <iostream>
 
+static constexpr int firstFullbrightColor = 240;
+static constexpr int lastFullbrightColor = 254;
+static constexpr int numFullbrightColors = lastFullbrightColor - firstFullbrightColor + 1;
+
 using namespace molecular::util;
 
 TextureImage::TextureImage(const char* filename)
@@ -35,7 +39,11 @@ TextureImage::TextureImage(const char* filename)
 		mHdrImage = std::make_unique<StbHdrImage>(filename, 3);
 	else
 		mImage = std::make_unique<StbImage>(filename, 4);
+}
 
+void TextureImage::SetEmission(const char* filename)
+{
+	mEmissionImage = std::make_unique<StbImage>(filename, 3);
 }
 
 static std::vector<uint8_t> HdrToIndexed(const StbHdrImage& hdrImage, const uint8_t* palette, int mipLevel, float hdrScale)
@@ -84,8 +92,8 @@ static std::vector<uint8_t> HdrToIndexed(const StbHdrImage& hdrImage, const uint
 				static_cast<uint8_t>(std::clamp<int>(rgb[1] - fullbrightOffset, 0, 255)),
 				static_cast<uint8_t>(std::clamp<int>(rgb[2] - fullbrightOffset, 0, 255)),
 			};
-			// Indices 240 to 254 are for fullbright colors:
-			indexedImage[i] = FindClosestPaletteColor(rgbi, palette + 240*3, 15) + 240;
+
+			indexedImage[i] = FindClosestPaletteColor(rgbi, palette + firstFullbrightColor*3, numFullbrightColors) + firstFullbrightColor;
 		}
 		else
 		{
@@ -94,7 +102,7 @@ static std::vector<uint8_t> HdrToIndexed(const StbHdrImage& hdrImage, const uint
 				static_cast<uint8_t>(std::clamp<int>(rgb[1], 0, 255)),
 				static_cast<uint8_t>(std::clamp<int>(rgb[2], 0, 255)),
 			};
-			indexedImage[i] = FindClosestPaletteColor(rgbi, palette, 240);
+			indexedImage[i] = FindClosestPaletteColor(rgbi, palette, firstFullbrightColor);
 		}
 	}
 	return indexedImage;
@@ -129,6 +137,25 @@ static std::vector<uint8_t> LdrToIndexed(const StbImage& image, const uint8_t* p
 	return indexedImage;
 }
 
+static void AddEmission(std::vector<uint8_t>& indexedImage, const StbImage& emissionImage, const uint8_t* palette)
+{
+	if(emissionImage.GetWidth() * emissionImage.GetHeight() != indexedImage.size())
+		throw std::runtime_error("Emission image has wrong dimensions");
+
+	const uint8_t* emissionData = emissionImage.Data();
+	for(size_t i = 0; i < indexedImage.size(); ++i)
+	{
+		const uint8_t rgb[3] = {
+			emissionData[i*3],
+			emissionData[i*3+1],
+			emissionData[i*3+2]
+		};
+
+		if(rgb[0] > 0 || rgb[1] > 0 || rgb[2] > 0)
+			indexedImage[i] = FindClosestPaletteColor(rgb, palette + firstFullbrightColor*3, numFullbrightColors) + firstFullbrightColor;
+	}
+}
+
 std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither, int mipLevel, float hdrScale)
 {
 	std::vector<uint8_t> indexedImage;
@@ -149,9 +176,13 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 			throw std::runtime_error("Cannot use picture lump as MIP texture");
 		if(dither)
 			throw std::runtime_error("Cannot dither already indexed image");
-		return mIndexedImage;
+		indexedImage = mIndexedImage;
 	}
 	else
 		throw std::runtime_error("No texture image loaded");
+
+	if(mEmissionImage)
+		AddEmission(indexedImage, *mEmissionImage.get(), palette);
+
 	return indexedImage;
 }

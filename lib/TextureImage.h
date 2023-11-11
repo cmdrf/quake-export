@@ -12,6 +12,8 @@ class TextureImage
 public:
 	TextureImage(const char* filename);
 
+	void SetEmission(const char* filename);
+
 	int GetWidth() const {return mImage ? mImage->GetWidth() : mHdrImage->GetWidth();}
 	int GetHeight() const {return mImage ? mImage->GetHeight() : mHdrImage->GetHeight();}
 
@@ -19,6 +21,7 @@ public:
 
 private:
 	std::unique_ptr<StbImage> mImage;
+	std::unique_ptr<StbImage> mEmissionImage;
 	std::unique_ptr<StbHdrImage> mHdrImage;
 	std::vector<uint8_t> mIndexedImage;
 };

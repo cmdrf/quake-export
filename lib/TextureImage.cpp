@@ -12,7 +12,7 @@
 #include <cmath>
 #include <iostream>
 
-static constexpr int firstFullbrightColor = 240;
+static constexpr int firstFullbrightColor = 224;
 static constexpr int lastFullbrightColor = 254;
 static constexpr int numFullbrightColors = lastFullbrightColor - firstFullbrightColor + 1;
 

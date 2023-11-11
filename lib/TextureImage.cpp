@@ -171,7 +171,7 @@ static void AddEmission(std::vector<uint8_t>& indexedImage, const StbImage& emis
 			emissionData[i*3+2]
 		};
 
-		if(rgb[0] > 0 || rgb[1] > 0 || rgb[2] > 0)
+		if(rgb[0] > 10 || rgb[1] > 10 || rgb[2] > 10)
 			indexedImage[i] = FindClosestPaletteColor(rgb, palette + firstFullbrightColor*3, numFullbrightColors) + firstFullbrightColor;
 	}
 }

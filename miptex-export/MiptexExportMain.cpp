@@ -21,6 +21,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output MIPTEX file");
 	CommandLineParser::Flag dither(cmd, "dither", "Enable dithering");
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
+	CommandLineParser::Option<std::string> emission(cmd, "emission", "Emission texture to use for fullbright colors.");
 	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
 	CommandLineParser::Option<std::string> previewOutput(cmd, "preview-output", "Write quantized image back to file");
 	CommandLineParser::Option<std::string> nameOption(cmd, "name", "Name of the texture embedded in file. Defaults to file name without extension.");
@@ -47,6 +48,8 @@ int Main(int argc, char** argv)
 
 	FileWriteStorage outFile(outFileName->c_str());
 	TextureImage textureImage(inFileName->c_str());
+	if(emission)
+		textureImage.SetEmission(emission->c_str());
 	const auto width = textureImage.GetWidth();
 	const auto height = textureImage.GetHeight();
 

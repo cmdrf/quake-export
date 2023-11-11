@@ -137,12 +137,32 @@ static std::vector<uint8_t> LdrToIndexed(const StbImage& image, const uint8_t* p
 	return indexedImage;
 }
 
-static void AddEmission(std::vector<uint8_t>& indexedImage, const StbImage& emissionImage, const uint8_t* palette)
+static void AddEmission(std::vector<uint8_t>& indexedImage, const StbImage& emissionImage, const uint8_t* palette, int mipLevel)
 {
-	if(emissionImage.GetWidth() * emissionImage.GetHeight() != indexedImage.size())
+	int32_t width = emissionImage.GetWidth();
+	int32_t height = emissionImage.GetHeight();
+	const uint8_t* emissionData = emissionImage.Data();
+	std::vector<uint8_t> scaledEmissionImage;
+
+	if(mipLevel != 0)
+	{
+		int32_t newWidth = width;
+		int32_t newHeight = height;
+		for(int i = 0; i < mipLevel; ++i)
+		{
+			newWidth /= 2;
+			newHeight /= 2;
+		}
+		scaledEmissionImage.resize(newWidth * newHeight * 4);
+		stbir_resize_uint8_srgb_edgemode(emissionImage.Data(), width, height, width * 4, scaledEmissionImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
+		emissionData = scaledEmissionImage.data();
+		width = newWidth;
+		height = newHeight;
+	}
+
+	if(width * height != indexedImage.size())
 		throw std::runtime_error("Emission image has wrong dimensions");
 
-	const uint8_t* emissionData = emissionImage.Data();
 	for(size_t i = 0; i < indexedImage.size(); ++i)
 	{
 		const uint8_t rgb[3] = {
@@ -182,7 +202,7 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 		throw std::runtime_error("No texture image loaded");
 
 	if(mEmissionImage)
-		AddEmission(indexedImage, *mEmissionImage.get(), palette);
+		AddEmission(indexedImage, *mEmissionImage.get(), palette, mipLevel);
 
 	return indexedImage;
 }

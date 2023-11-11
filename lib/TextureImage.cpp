@@ -2,6 +2,8 @@
 #include "PaletteImage.h"
 #include "Transparency.h"
 
+#include <molecular/util/FileStreamStorage.h>
+
 #include <stb_image.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize.h>
@@ -10,8 +12,25 @@
 #include <cmath>
 #include <iostream>
 
+using namespace molecular::util;
+
 TextureImage::TextureImage(const char* filename)
 {
+	FileReadStorage storage(filename);
+	size_t fileSize = storage.GetSize();
+	if(fileSize > 8)
+	{
+		uint32_t width, height;
+		storage.Read(&width, 4);
+		storage.Read(&height, 4);
+		if(width * height + 8 == fileSize)
+		{
+			mIndexedImage.resize(width * height);
+			storage.Read(mIndexedImage.data(), width * height);
+			return;
+		}
+	}
+
 	if(stbi_is_hdr(filename))
 		mHdrImage = std::make_unique<StbHdrImage>(filename, 3);
 	else
@@ -120,9 +139,19 @@ std::vector<uint8_t> TextureImage::ToIndexed(const uint8_t* palette, bool dither
 
 		indexedImage = HdrToIndexed(*mHdrImage, palette, mipLevel, hdrScale);
 	}
-	else
+	else if(mImage)
 	{
 		indexedImage = LdrToIndexed(*mImage, palette, dither, mipLevel);
 	}
+	else if(!mIndexedImage.empty())
+	{
+		if(mipLevel != 0)
+			throw std::runtime_error("Cannot use picture lump as MIP texture");
+		if(dither)
+			throw std::runtime_error("Cannot dither already indexed image");
+		return mIndexedImage;
+	}
+	else
+		throw std::runtime_error("No texture image loaded");
 	return indexedImage;
 }

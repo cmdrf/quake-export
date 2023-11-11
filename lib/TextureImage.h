@@ -20,6 +20,7 @@ public:
 private:
 	std::unique_ptr<StbImage> mImage;
 	std::unique_ptr<StbHdrImage> mHdrImage;
+	std::vector<uint8_t> mIndexedImage;
 };
 
 #endif // TEXTUREIMAGE_H

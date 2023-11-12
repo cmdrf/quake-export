@@ -16,9 +16,10 @@ namespace MdlJson
 static SimpleSkin ReadSkin(const json& skin)
 {
 	std::string image = skin.at("image");
-	SimpleSkin out {
-		TextureImage(image.c_str())
-	};
+	TextureImage out(image.c_str());
+	if(skin.contains("emission-image"))
+		out.SetEmission(skin.at("emission-image").get<std::string>().c_str());
+
 	return out;
 }
 

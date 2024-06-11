@@ -6,11 +6,10 @@
 
 #include <stb_image.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include <stb_image_resize.h>
+#include <stb_image_resize2.h>
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 static constexpr int firstFullbrightColor = 224;
 static constexpr int lastFullbrightColor = 254;
@@ -64,7 +63,20 @@ static std::vector<uint8_t> HdrToIndexed(const StbHdrImage& hdrImage, const uint
 			newHeight /= 2;
 		}
 		scaledImage.resize(newWidth * newHeight * 4);
-		stbir_resize_float_generic(data, width, height, 0, scaledImage.data(), newWidth, newHeight, 0, 3, STBIR_ALPHA_CHANNEL_NONE, 0, STBIR_EDGE_WRAP, STBIR_FILTER_DEFAULT, STBIR_COLORSPACE_LINEAR, nullptr);
+		stbir_resize(
+					data, // input_pixels
+					width, // input_w
+					height, // input_h
+					0, // input_stride_in_bytes
+					scaledImage.data(), // output_pixels
+					newWidth,
+					newHeight,
+					0, // output_stride_in_bytes
+					STBIR_RGB, // pixel_layout
+					STBIR_TYPE_FLOAT, // data_type
+					STBIR_EDGE_WRAP, // edge
+					STBIR_FILTER_DEFAULT // filter
+					);
 
 		// Use new image data and size from here:
 		data = scaledImage.data();
@@ -125,7 +137,20 @@ static std::vector<uint8_t> LdrToIndexed(const StbImage& image, const uint8_t* p
 			newHeight /= 2;
 		}
 		scaledImage.resize(newWidth * newHeight * 4);
-		stbir_resize_uint8_srgb_edgemode(image.Data(), width, height, width * 4, scaledImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
+		stbir_resize(
+					image.Data(), // input_pixels
+					width,	// input_w
+					height, // input_h
+					width * 4, // input_stride_in_bytes
+					scaledImage.data(), // output_pixels
+					newWidth, // output_w
+					newHeight, // output_h
+					newWidth * 4, // output_stride_in_bytes
+					STBIR_RGBA, // pixel_layout
+					STBIR_TYPE_UINT8, // data_type
+					STBIR_EDGE_WRAP, // edge
+					STBIR_FILTER_DEFAULT // filter
+				);
 		imageData = scaledImage.data();
 		width = newWidth;
 		height = newHeight;
@@ -154,7 +179,20 @@ static void AddEmission(std::vector<uint8_t>& indexedImage, const StbImage& emis
 			newHeight /= 2;
 		}
 		scaledEmissionImage.resize(newWidth * newHeight * 4);
-		stbir_resize_uint8_srgb_edgemode(emissionImage.Data(), width, height, width * 4, scaledEmissionImage.data(), newWidth, newHeight, newWidth * 4, 4, 3, 0, STBIR_EDGE_WRAP);
+		stbir_resize(
+					emissionImage.Data(),
+					width,
+					height,
+					width * 4,
+					scaledEmissionImage.data(), // output_pixels
+					newWidth,
+					newHeight,
+					newWidth * 4, // output_stride_in_bytes
+					STBIR_RGBA, // pixel_layout
+					STBIR_TYPE_UINT8, // data_type
+					STBIR_EDGE_WRAP, // edge
+					STBIR_FILTER_DEFAULT // filter
+				);
 		emissionData = scaledEmissionImage.data();
 		width = newWidth;
 		height = newHeight;

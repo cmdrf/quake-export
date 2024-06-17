@@ -22,6 +22,7 @@ struct PakEntry
 int Main(int argc, char** argv)
 {
 	CommandLineParser cmd;
+	CommandLineParser::Flag mergePaks(cmd, "merge-paks", "Input files are PAK files to be merged into one");
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output PAK file");
 	CommandLineParser::RemainingPositionalArgs remaining(cmd, "input files", "Input files");
 	CommandLineParser::HelpFlag help(cmd);
@@ -45,18 +46,42 @@ int Main(int argc, char** argv)
 
 	for(auto& fileName: *remaining)
 	{
-		FileReadStorage file(fileName);
-		size_t size = file.GetSize();
-		std::vector<uint8_t> fileData(size);
-		file.Read(fileData.data(), size);
+		if(mergePaks)
+		{
+			FileReadStorage inputPakFile(fileName);
+			PakHeader inHeader;
+			inputPakFile.Read(&inHeader, sizeof(PakHeader));
+			std::vector<PakEntry> inEntries(inHeader.dirsize);
+			inputPakFile.SetCursor(inHeader.diroffset);
+			inputPakFile.Read(inEntries.data(), inHeader.dirsize * sizeof(PakEntry));
+			for(auto& inEntry: inEntries)
+			{
+				inputPakFile.SetCursor(inEntry.offset);
+				std::vector<uint8_t> fileData(inEntry.size);
+				inputPakFile.Read(fileData.data(), inEntry.size);
+				PakEntry entry;
+				memcpy(entry.filename, inEntry.filename, 56);
+				entry.size = inEntry.size;
+				entry.offset = outFile.GetCursor();
+				entries.push_back(entry);
+				outFile.Write(fileData.data(), fileData.size());
+			}
+		}
+		else
+		{
+			FileReadStorage file(fileName);
+			size_t size = file.GetSize();
+			std::vector<uint8_t> fileData(size);
+			file.Read(fileData.data(), size);
 
-		PakEntry entry;
-		memset(entry.filename, 0, 56);
-		strncpy(entry.filename, fileName.c_str(), 56);
-		entry.size = size;
-		entry.offset = outFile.GetCursor();
-		entries.push_back(entry);
-		outFile.Write(fileData.data(), fileData.size());
+			PakEntry entry;
+			memset(entry.filename, 0, 56);
+			strncpy(entry.filename, fileName.c_str(), 56);
+			entry.size = size;
+			entry.offset = outFile.GetCursor();
+			entries.push_back(entry);
+			outFile.Write(fileData.data(), fileData.size());
+		}
 	}
 
 	header.diroffset = outFile.GetCursor();

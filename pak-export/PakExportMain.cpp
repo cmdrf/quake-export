@@ -23,6 +23,7 @@ int Main(int argc, char** argv)
 {
 	CommandLineParser cmd;
 	CommandLineParser::Flag mergePaks(cmd, "merge-paks", "Input files are PAK files to be merged into one");
+	CommandLineParser::Option<std::string> prefix(cmd, "prefix", "Prefix to prepend to all file names inside the PAK file", "");
 	CommandLineParser::PositionalArg<std::string> outFileName(cmd, "output file", "Output PAK file");
 	CommandLineParser::RemainingPositionalArgs remaining(cmd, "input files", "Input files");
 	CommandLineParser::HelpFlag help(cmd);
@@ -60,7 +61,8 @@ int Main(int argc, char** argv)
 				std::vector<uint8_t> fileData(inEntry.size);
 				inputPakFile.Read(fileData.data(), inEntry.size);
 				PakEntry entry;
-				memcpy(entry.filename, inEntry.filename, 56);
+				memset(entry.filename, 0, 56);
+				snprintf(entry.filename, 56, "%s%s", prefix->c_str(), inEntry.filename);
 				entry.size = inEntry.size;
 				entry.offset = outFile.GetCursor();
 				entries.push_back(entry);
@@ -76,7 +78,7 @@ int Main(int argc, char** argv)
 
 			PakEntry entry;
 			memset(entry.filename, 0, 56);
-			strncpy(entry.filename, fileName.c_str(), 56);
+			snprintf(entry.filename, 56, "%s%s", prefix->c_str(), fileName.c_str());
 			entry.size = size;
 			entry.offset = outFile.GetCursor();
 			entries.push_back(entry);

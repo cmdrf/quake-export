@@ -52,6 +52,10 @@ int Main(int argc, char** argv)
 			FileReadStorage inputPakFile(fileName);
 			PakHeader inHeader;
 			inputPakFile.Read(&inHeader, sizeof(PakHeader));
+			if(strncmp(inHeader.magic, "PACK", 4) != 0)
+				throw std::runtime_error("Not a PAK file");
+			if(inHeader.diroffset + inHeader.dirsize > inputPakFile.GetSize())
+				throw std::runtime_error("PAK file is corrupt");
 			std::vector<PakEntry> inEntries(inHeader.dirsize);
 			inputPakFile.SetCursor(inHeader.diroffset);
 			inputPakFile.Read(inEntries.data(), inHeader.dirsize * sizeof(PakEntry));

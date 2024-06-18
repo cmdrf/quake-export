@@ -8,7 +8,10 @@ using namespace molecular::util;
 struct PakHeader
 {
 	char magic[4] = {'P', 'A', 'C', 'K'};
+
+	/// Offset to the directory
 	uint32_t diroffset = 0;
+	/// Size of the directory in bytes
 	uint32_t dirsize = 0;
 };
 
@@ -54,13 +57,20 @@ int Main(int argc, char** argv)
 			inputPakFile.Read(&inHeader, sizeof(PakHeader));
 			if(strncmp(inHeader.magic, "PACK", 4) != 0)
 				throw std::runtime_error("Not a PAK file");
-			if(inHeader.diroffset + inHeader.dirsize > inputPakFile.GetSize())
+
+			const size_t inputPakSize = inputPakFile.GetSize();
+			// Check if PAK directory is inside file:
+			if(inHeader.diroffset + inHeader.dirsize > inputPakSize)
 				throw std::runtime_error("PAK file is corrupt");
-			std::vector<PakEntry> inEntries(inHeader.dirsize);
+
+			std::vector<PakEntry> inEntries(inHeader.dirsize / 64);
 			inputPakFile.SetCursor(inHeader.diroffset);
-			inputPakFile.Read(inEntries.data(), inHeader.dirsize * sizeof(PakEntry));
+			inputPakFile.Read(inEntries.data(), inHeader.dirsize);
 			for(auto& inEntry: inEntries)
 			{
+				if(inEntry.offset + inEntry.size > inputPakSize)
+					throw std::runtime_error("PAK file is corrupt");
+
 				inputPakFile.SetCursor(inEntry.offset);
 				std::vector<uint8_t> fileData(inEntry.size);
 				inputPakFile.Read(fileData.data(), inEntry.size);

@@ -4,6 +4,7 @@
 #include <molecular/util/CommandLineParser.h>
 #include <stb_image.h>
 
+#include <cmath>
 #include <iostream>
 
 using namespace molecular::util;

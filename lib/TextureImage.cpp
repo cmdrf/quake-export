@@ -89,27 +89,29 @@ static std::vector<uint8_t> HdrToIndexed(const StbHdrImage& hdrImage, const uint
 	// Iterate over all pixels:
 	for(int i = 0; i < width * height; ++i)
 	{
-		float rgb[3] = {
-			std::pow(data[i*3] * hdrScale, 2.2f) * 255.f + 0.5f,
-			std::pow(data[i*3+1] * hdrScale, 2.2f) * 255.f + 0.5f,
-			std::pow(data[i*3+2] * hdrScale, 2.2f) * 255.f + 0.5f
-		};
-
-		// Colors above 255,255,255 map to fullbright part of palette:
-		if(rgb[0] > 255.f || rgb[1] > 255.f || rgb[2] > 255.f)
+		// Colors above 100% map to fullbright colors:
+		if(data[i*3] > 1.f || data[i*3+1] > 1.f || data[i*3+2] > 1.f)
 		{
-			const float fullbrightOffset = 128.f; // Map colors back into 0..255
-			uint8_t rgbi[3] = {
-				static_cast<uint8_t>(std::clamp<int>(rgb[0] - fullbrightOffset, 0, 255)),
-				static_cast<uint8_t>(std::clamp<int>(rgb[1] - fullbrightOffset, 0, 255)),
-				static_cast<uint8_t>(std::clamp<int>(rgb[2] - fullbrightOffset, 0, 255)),
+			const float rgb[3] = {
+				std::pow(data[i*3] * hdrScale - 1.f, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+1] * hdrScale - 1.f, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+2] * hdrScale -1.f, 2.2f) * 255.f + 0.5f
 			};
-
+			const uint8_t rgbi[3] = {
+				static_cast<uint8_t>(std::clamp<int>(rgb[0], 0, 255)),
+				static_cast<uint8_t>(std::clamp<int>(rgb[1], 0, 255)),
+				static_cast<uint8_t>(std::clamp<int>(rgb[2], 0, 255)),
+			};
 			indexedImage[i] = FindClosestPaletteColor(rgbi, palette + firstFullbrightColor*3, numFullbrightColors) + firstFullbrightColor;
 		}
 		else
 		{
-			uint8_t rgbi[3] = {
+			const float rgb[3] = {
+				std::pow(data[i*3] * hdrScale, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+1] * hdrScale, 2.2f) * 255.f + 0.5f,
+				std::pow(data[i*3+2] * hdrScale, 2.2f) * 255.f + 0.5f
+			};
+			const uint8_t rgbi[3] = {
 				static_cast<uint8_t>(std::clamp<int>(rgb[0], 0, 255)),
 				static_cast<uint8_t>(std::clamp<int>(rgb[1], 0, 255)),
 				static_cast<uint8_t>(std::clamp<int>(rgb[2], 0, 255)),

@@ -60,7 +60,7 @@ void WriteSimpleMdl(
 		const std::vector<Vector3>& normals,
 		const std::vector<Vector2>& uvs,
 		const std::vector<uint8_t>& skin,
-		int skinWidth, int skinHeight,
+		int skinWidth, int skinHeight, uint32_t flags,
 		const std::string& outFile)
 {
 	assert(positions.size() == normals.size());
@@ -80,6 +80,7 @@ void WriteSimpleMdl(
 	header.numVerts = positions.size();
 	header.numTris = indices.size() / 3;
 	header.numFrames = 1;
+	header.flags = flags;
 	header.size = CalculateAverageTriangleArea(indices, positions);
 
 	mdl.WriteHeader(header);
@@ -97,7 +98,14 @@ void WriteSimpleMdl(
 	mdl.WriteSingleFrame(frame);
 }
 
-void ProcessStaticModel(const std::string& objPath, const std::string& outputPath, const std::string& texturePath, const std::string& emissionPath, const uint8_t* paletteData, bool dither, float hdrScale)
+void ProcessStaticModel(const std::string& objPath,
+						const std::string& outputPath,
+						const std::string& texturePath,
+						const std::string& emissionPath,
+						const uint8_t* paletteData,
+						bool dither,
+						float hdrScale,
+						uint32_t flags)
 {
 	TextureImage textureImage(texturePath.c_str());
 	if(!emissionPath.empty())
@@ -110,11 +118,11 @@ void ProcessStaticModel(const std::string& objPath, const std::string& outputPat
 	std::vector<Vector2> uvs;
 
 	ReadObj(objPath, indices, positions, normals, uvs);
-	WriteSimpleMdl(indices, positions, normals, uvs, skin, textureImage.GetWidth(), textureImage.GetHeight(), outputPath);
+	WriteSimpleMdl(indices, positions, normals, uvs, skin, textureImage.GetWidth(), textureImage.GetHeight(), flags, outputPath);
 }
 
 
-void ProcessComplexModel(const std::string& jsonPath, const std::string& outputPath, const uint8_t* paletteData, bool dither, float hdrScale)
+void ProcessComplexModel(const std::string& jsonPath, const std::string& outputPath, const uint8_t* paletteData, bool dither, float hdrScale, uint32_t flags)
 {
 	MdlJson::Data data = MdlJson::Read(jsonPath);
 
@@ -133,6 +141,7 @@ void ProcessComplexModel(const std::string& jsonPath, const std::string& outputP
 	header.numVerts = data.mainPositions.size();
 	header.numTris = data.mainIndices.size() / 3;
 	header.numFrames = data.frames.size();
+	header.flags = flags;
 	header.size = CalculateAverageTriangleArea(data.mainIndices, data.mainPositions);
 
 	FileWriteStorage file(outputPath);
@@ -229,6 +238,7 @@ int Main(int argc, char** argv)
 	CommandLineParser::Option<std::string> palette(cmd, "palette", "Palette to use instead of default Quake palette. Can be image or lump.");
 	CommandLineParser::Option<std::string> emission(cmd, "emission", "Emission texture to use for fullbright colors.");
 	CommandLineParser::Option<float> hdrScale(cmd, "hdr-scale", "Controls brightness when using HDR images.", 1.0f);
+	CommandLineParser::Option<uint32_t> flags(cmd, "flags", "Set MDL flags.", 0);
 	CommandLineParser::HelpFlag help(cmd);
 
 	try
@@ -258,11 +268,11 @@ int Main(int argc, char** argv)
 			return EXIT_FAILURE;
 		}
 
-		ProcessStaticModel(*inFileName, *outFileName, *texture, *emission, paletteData, dither, *hdrScale);
+		ProcessStaticModel(*inFileName, *outFileName, *texture, *emission, paletteData, dither, *hdrScale, *flags);
 	}
 	else if(StringUtils::EndsWith(*inFileName, ".json"))
 	{
-		ProcessComplexModel(*inFileName, *outFileName, paletteData, dither, *hdrScale);
+		ProcessComplexModel(*inFileName, *outFileName, paletteData, dither, *hdrScale, *flags);
 	}
 	else
 		throw std::runtime_error("Unrecognized input file type");
